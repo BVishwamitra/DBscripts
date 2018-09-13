@@ -1,2 +1,2 @@
 # DBscripts
-This project contain the db scripts which I have created in my experience
+This project contain all PostgreSQL scripts which I have created and used in my experience.
