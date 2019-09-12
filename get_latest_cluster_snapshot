@@ -1,0 +1,22 @@
+import boto3
+import sys 
+
+def get_rds_ec2_kms_clients(account, region):
+    try:
+        session = boto3.session.Session(profile_name='{}/dba'.format(account))
+        rds = session.client('rds', region_name='{}'.format(region))
+        ec2 = session.client('ec2', region_name='{}'.format(region))
+        kms = session.client('kms', region_name='{}'.format(region))
+        return rds, ec2, kms
+    except ClientError as e:
+        raise Exception('exception while fetching boto3 connection', e.response['Error']['Code'])
+        sys.exit(1)
+
+def get_latest_cluster_snapshot(source_account,source_region,cluster_identifier):
+    rds, ec2, kms = get_rds_ec2_kms_clients(source_account, source_region)
+    response = rds.describe_db_cluster_snapshots(DBClusterIdentifier=cluster_identifier,SnapshotType='manual')['DBClusterSnapshots']
+    response.sort(key=lambda d: d['SnapshotCreateTime'])
+    return response[-1]['DBClusterSnapshotIdentifier']
+    
+cluster_identifier = get_latest_cluster_snapshot('dev','us-east-1','test-cluster')
+print cluster_identifier
